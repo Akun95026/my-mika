@@ -33,7 +33,7 @@ sealed interface SpeechFailure {
     data object NoPermission : SpeechFailure
     data object Busy : SpeechFailure
     data object Network : SpeechFailure
-    /** 麦克风起不来(识别服务报客户端出错、开始听时抛错、服务商那条路的录音起不来):多半是被别的应用占着。 */
+    /** 本机录音器起不来(服务商转写用的录音):可能被别的应用占着;识别服务初始化失败另行说明。 */
     data object MicUnavailable : SpeechFailure
     /**
      * 识别服务报录音出错(ERROR_AUDIO):录音权限给了也可能录不到,例如系统的麦克风使用总开关关着,

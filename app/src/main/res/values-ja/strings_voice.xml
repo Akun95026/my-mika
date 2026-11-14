@@ -31,6 +31,7 @@
     <string name="voice_unavailable_no_engine">このスマホには内蔵の音声認識がなく、音声文字変換のモデルも選ばれていません。「設定 › モデル › 音声文字変換」でプロバイダーの音声モデルを選ぶと使えます。</string>
     <string name="voice_unavailable_system_gone">音声文字変換はスマホ内蔵の音声認識に設定されていますが、このスマホには今はありません。「設定 › モデル › 音声文字変換」で別のものを選んでください。</string>
     <string name="voice_unavailable_system_silent">スマホ内蔵の音声認識が応答せず、言葉が届きませんでした。「設定 › モデル › 音声文字変換」でプロバイダーの音声モデルを選ぶと使えます。</string>
+    <string name="voice_unavailable_system_failed">スマホ内蔵の音声認識を開始できませんでした。もう一度試すか、「設定 › モデル › 音声文字変換」で別の認識方法を選んでください。</string>
     <string name="voice_unavailable_provider_gone">選んだ音声モデルのプロバイダーは削除されました。「設定 › モデル › 音声文字変換」で別のものを選んでください。</string>
     <string name="voice_unavailable_off">音声文字変換がオフです。「設定 › モデル › 音声文字変換」で選んでください。</string>
     <string name="voice_go_pick">選ぶ</string>

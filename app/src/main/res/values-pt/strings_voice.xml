@@ -30,6 +30,7 @@
     <string name="voice_unavailable_no_engine">Este celular não tem reconhecimento de fala integrado, e nenhum modelo de fala para texto foi escolhido. Escolha o modelo de fala de um provedor em Configurações › Modelos › Fala para texto e vai funcionar.</string>
     <string name="voice_unavailable_system_gone">Fala para texto está definido como o reconhecimento integrado do celular, mas este celular não o tem agora. Escolha outro em Configurações › Modelos › Fala para texto.</string>
     <string name="voice_unavailable_system_silent">O reconhecimento de fala integrado do celular não respondeu, então nenhuma palavra chegou. Escolha o modelo de fala de um provedor em Configurações › Modelos › Fala para texto e vai funcionar.</string>
+    <string name="voice_unavailable_system_failed">Não foi possível iniciar o reconhecimento de fala integrado do celular. Tente novamente ou escolha outra forma de reconhecimento em Configurações › Modelos › Fala para texto.</string>
     <string name="voice_unavailable_provider_gone">O provedor do modelo de fala escolhido foi removido. Escolha outro em Configurações › Modelos › Fala para texto.</string>
     <string name="voice_unavailable_off">Fala para texto está desativado. Escolha uma opção em Configurações › Modelos › Fala para texto.</string>
     <string name="voice_go_pick">Escolher</string>

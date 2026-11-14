@@ -31,6 +31,7 @@
     <string name="voice_unavailable_no_engine">Este teléfono no tiene reconocimiento de voz integrado y no se ha elegido ningún modelo de voz a texto. Elige el modelo de voz de un proveedor en Ajustes › Modelos › Voz a texto y funcionará.</string>
     <string name="voice_unavailable_system_gone">Voz a texto está configurado con el reconocimiento integrado del teléfono, pero este teléfono ya no lo tiene. Elige otro en Ajustes › Modelos › Voz a texto.</string>
     <string name="voice_unavailable_system_silent">El reconocimiento de voz integrado del teléfono no respondió, así que no llegó ninguna palabra. Elige el modelo de voz de un proveedor en Ajustes › Modelos › Voz a texto y funcionará.</string>
+    <string name="voice_unavailable_system_failed">No se pudo iniciar el reconocimiento de voz integrado del teléfono. Inténtalo de nuevo o elige otro método de reconocimiento en Ajustes › Modelos › Voz a texto.</string>
     <string name="voice_unavailable_provider_gone">Se eliminó el proveedor del modelo de voz elegido. Elige otro en Ajustes › Modelos › Voz a texto.</string>
     <string name="voice_unavailable_off">Voz a texto está desactivado. Elige uno en Ajustes › Modelos › Voz a texto.</string>
     <string name="voice_go_pick">Elegir uno</string>
