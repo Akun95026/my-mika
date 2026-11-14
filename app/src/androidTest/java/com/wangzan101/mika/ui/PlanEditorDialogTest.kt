@@ -1,6 +1,7 @@
 package com.wangzan101.mika.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -141,6 +142,36 @@ class PlanEditorDialogTest {
         compose.onNodeWithTag("plan-editor-first-at").performTextInput("2099-01-01 00:00")
         compose.onNodeWithTag("plan-editor-save").performSemanticsAction(SemanticsActions.OnClick)
         assertEquals(1, saved.size)
+    }
+
+    /** 新增时刻不用打字:默认从最后一个时刻往后一小时,加完点叉还能删掉。 */
+    @Test fun clockChipsAddAndRemoveTimesWithoutTyping() {
+        val saved = mutableListOf<TriggerDefinition>()
+        show(saved = saved)
+        compose.onNodeWithTag("plan-editor-content").performTextInput("检查天气")
+        compose.onNodeWithTag("plan-editor-daily").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("plan-editor-clock-add").performScrollTo().performClick()
+        compose.onNodeWithTag("plan-time-ok").performClick()
+        compose.onNodeWithTag("plan-editor-clock").assertTextContains("09:00, 10:00")
+        compose.onNodeWithTag("plan-editor-clock-remove-1").performScrollTo().performClick()
+        compose.onNodeWithTag("plan-editor-clock").assertTextContains("09:00")
+        compose.onNodeWithTag("plan-editor-save").performSemanticsAction(SemanticsActions.OnClick)
+
+        assertEquals(listOf("09:00"), saved.single().calendarClocks())
+    }
+
+    /** 首次执行走日期 + 时间选择器:选中的 23:59 要写回编辑框。 */
+    @Test fun dateAndTimePickersWriteTheFirstRunTime() {
+        show(saved = mutableListOf())
+        compose.onNodeWithTag("plan-editor-content").performTextInput("检查天气")
+        compose.onNodeWithTag("plan-editor-first-at-pick").performClick()
+        compose.onNodeWithTag("plan-date-picker").assertExists()
+        compose.onNodeWithTag("plan-date-ok").performClick()
+        compose.onNodeWithTag("plan-time-hour-21").performScrollTo().performClick()
+        compose.onNodeWithTag("plan-time-minute-57").performScrollTo().performClick()
+        compose.onNodeWithTag("plan-time-ok").performClick()
+
+        compose.onNodeWithTag("plan-editor-first-at").assertTextContains("23:59", substring = true)
     }
 
     @Test fun plansPageHasManualCreationEntry() {
