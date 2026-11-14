@@ -194,6 +194,11 @@ class SystemSpeechSession(
     private val attempts: List<String?> = listOf(null),
     /** 默认关着:只由入口对已经确认需要兼容的设备开启。 */
     private val compatibility: Boolean = false,
+    /**
+     * 识别服务说没有权限时问一句:是不是这次用的那个服务自己没有录音权限。给的是这次点名的服务的包名(没点名为 null)、
+     * 用的是不是本机识别;确定是它缺权限才返回它(见 [SpeechServiceMic.missing]),别的情况为 null。
+     */
+    private val serviceWithoutMic: (String?, Boolean) -> SpeechServiceTarget? = { _, _ -> null },
 ) : SpeechSession {
     private val context = context.applicationContext
     private val main = Handler(Looper.getMainLooper())
@@ -407,9 +412,19 @@ class SystemSpeechSession(
         when (outcome) {
             SystemSpeech.Outcome.Retry -> emptySegment()
             SystemSpeech.Outcome.Finish -> finish(SpeechEvent.Final(segments.full()))
-            is SystemSpeech.Outcome.Fail -> finish(SpeechEvent.Failed(outcome.why))
+            is SystemSpeech.Outcome.Fail -> finish(SpeechEvent.Failed(explained(outcome.why)))
             SystemSpeech.Outcome.NextService -> Unit
         }
+    }
+
+    /**
+     * 识别服务说没有权限:Mika 的录音权限是开会话前查过的,所以多半是识别服务自己的没给。查得出来就照实说是它,
+     * 查不出来的照原来的说法。要在收拾识别器之前问:这次用的是哪个入口那时才知道。
+     */
+    private fun explained(why: SpeechFailure): SpeechFailure {
+        if (why != SpeechFailure.NoPermission) return why
+        val named = attempts.getOrNull(attempt)?.let(ComponentName::unflattenFromString)?.packageName
+        return serviceWithoutMic(named, usingOnDevice)?.let { SpeechFailure.ServiceNoPermission(it) } ?: why
     }
 
     private fun request(): Intent =

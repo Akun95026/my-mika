@@ -40,6 +40,11 @@ sealed interface SpeechFailure {
      * 或系统权限管理里单独关掉了麦克风。界面据此说明该去哪里看。
      */
     data object AudioError : SpeechFailure
+    /**
+     * 识别服务说没有权限,而且查得出来是它自己(另一个应用)没有录音权限,不是 Mika 没有(见 [SpeechServiceMic])。
+     * 界面据此说明,并带用户去那个应用的设置页。
+     */
+    data class ServiceNoPermission(val service: SpeechServiceTarget) : SpeechFailure
     data class Provider(val error: ModelError) : SpeechFailure
     data class Unavailable(val why: SpeechEngineSpec.Why) : SpeechFailure
 }

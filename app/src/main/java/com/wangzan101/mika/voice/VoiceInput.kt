@@ -67,6 +67,7 @@ class VoiceInput(
                     onNoResponse = settings::noteSystemSilent, onAnswered = settings::noteSystemAnswered,
                     attempts = SystemSpeech.attempts(SystemSpeech.services(context), settings.systemService, compatibility),
                     compatibility = compatibility,
+                    serviceWithoutMic = { named, onDevice -> SpeechServiceMic.missing(context, named, onDevice) },
                 )
             }
             is SpeechEngineSpec.Provider -> {
