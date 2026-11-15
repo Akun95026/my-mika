@@ -18,10 +18,10 @@
 
 ## 4. 真机验证与取证
 
-- [ ] 4.1 构建装机（debug/perf），配置无视觉主模型 + 视觉模型，聊天附件上传截图问「图里有什么字」，任务应返回图中文字（对比修复前空手而归）
-- [ ] 4.2 截图/日志取证存 `openspec/changes/fix-624-image-vision-fallback/evidence/`（敏感内容不入库），写 evidence.md 时间线
+- [x] 4.1 构建装机（debug/perf），配置无视觉主模型 + 视觉模型，聊天附件上传截图问「图里有什么字」，任务应返回图中文字（对比修复前空手而归）
+- [x] 4.2 截图/日志取证存 `openspec/changes/fix-624-image-vision-fallback/evidence/`（敏感内容不入库），写 evidence.md 时间线
 
 ## 5. 收尾
 
-- [ ] 5.1 `openspec` 产物随分支提交；PR 正文关联 #624，标题「现状 → 改动」句式，首屏给实测证据
+- [x] 5.1 `openspec` 产物随分支提交；PR 正文关联 #624，标题「现状 → 改动」句式，首屏给实测证据
 - [ ] 5.2 push 分支到 fork、建 PR（base: main，head: TroyLiu2023:fix/624-image-vision-fallback）
