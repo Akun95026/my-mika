@@ -24,4 +24,4 @@
 ## 5. 收尾
 
 - [x] 5.1 `openspec` 产物随分支提交；PR 正文关联 #624，标题「现状 → 改动」句式，首屏给实测证据
-- [ ] 5.2 push 分支到 fork、建 PR（base: main，head: TroyLiu2023:fix/624-image-vision-fallback）
+- [x] 5.2 push 分支到 fork、建 PR（base: main，head: TroyLiu2023:fix/624-image-vision-fallback）
