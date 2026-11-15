@@ -154,7 +154,7 @@ fun toolDispatcher(
         },
         object : CapabilityProvider {
             override val id = SANDBOX
-            override fun open(spec: RunSpec) = SandboxCapability(sandbox, workspace, visionEnabled,
+            override fun open(spec: RunSpec) = SandboxCapability(sandbox, workspace, visionEnabled, vision,
                 onSandboxCommand, onSandboxProgress, onSandboxPreparing, onSandboxScript)
         },
     ) + listOfNotNull(root?.let { port ->

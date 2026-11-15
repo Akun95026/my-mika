@@ -1,0 +1,7 @@
+mock models on :8900
+[other_call] {"model": "mock-main", "has_image": false, "tools": [], "inbox_match": "/workspace/inbox/shot.png", "user_tail": "<message>\n读出附件图片里的文字,告诉我写了什么。\n附件:/workspace/inbox/shot.png(2 KB)\n</message>"}
+[main_tool_call] {"model": "mock-main", "path": "/workspace/inbox/shot.png", "has_image": false}
+[vision_call] {"model": "mock-vision", "has_image": true, "n_messages": 2, "system_head": "You read one image file (a screenshot, photo, or picture) fo"}
+[main_final] {"model": "mock-main", "tool_result_head": "{\"ok\":true,\"path\":\"/workspace/inbox/shot.png\",\"size\":2108,\"type\":\"image/png\",\"content\":\"[文字] MIKA-624-回退成功\\n[画面] 一张白底黑字的"}
+[other_call] {"model": "mock-main", "has_image": false, "tools": [], "inbox_match": "/workspace/inbox/shot.png", "user_tail": "<request>\n读出附件图片里的文字,告诉我写了什么。\n附件:/workspace/inbox/shot.png(2 KB)\n</request>\n\n<reply>\n附件图里的文字是:{\"ok\":true,\"path\":\"/workspace/inbox/shot.png\",\"size\":2108,\"type\":\"image/png\",\"content\":\"[文字] MIKA-624-回退成功\\n[画面] 一张白底黑字的测试图\",\"source\":\"vision\"}(视觉模型转写,read_file 返回 source=vision)\n</reply>"}
+[other_call] {"model": "mock-main", "has_image": false, "tools": [], "inbox_match": "/workspace/inbox/shot.png", "user_tail": "<request>\n读出附件图片里的文字,告诉我写了什么。\n附件:/workspace/inbox/shot.png(2 KB)\n</request>\n\n<reply>\n附件图里的文字是:{\"ok\":true,\"path\":\"/workspace/inbox/shot.png\",\"size\":2108,\"type\":\"image/png\",\"content\":\"[文字] MIKA-624-回退成功\\n[画面] 一张白底黑字的测试图\",\"source\":\"vision\"}(视觉模型转写,read_file 返回 source=vision)\n</reply>"}
