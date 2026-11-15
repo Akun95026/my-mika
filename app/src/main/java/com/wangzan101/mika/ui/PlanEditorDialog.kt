@@ -147,10 +147,16 @@ fun PlanEditorDialog(
                     is TimeTarget.FirstRun ->
                         draft = draft.copy(firstAt = formatPlanEditorTime(LocalDateTime.of(target.date, time)))
                     is TimeTarget.Clock -> {
-                        val updated = clockEntries.toMutableList()
+                        val parsed = planClockEntries(draft.clock)
                         val index = target.index
-                        if (index != null && index in updated.indices) updated[index] = time else updated.add(time)
-                        draft = draft.copy(clock = normalizedClockText(updated))
+                        val clock = if (parsed == null && draft.clock.isNotBlank()) {
+                            "${draft.clock.trimEnd()}, ${formatPlanClock(time)}"
+                        } else {
+                            val updated = parsed.orEmpty().toMutableList()
+                            if (index != null && index in updated.indices) updated[index] = time else updated.add(time)
+                            normalizedClockText(updated)
+                        }
+                        draft = draft.copy(clock = clock)
                     }
                 }
                 pickingTime = null
