@@ -1,7 +1,10 @@
 package com.wangzan101.mika.core.cap.sandbox
 
 import com.wangzan101.mika.core.model.Part
+import com.wangzan101.mika.core.prompt.Prompts
 import com.wangzan101.mika.core.tool.SubActions
+import com.wangzan101.mika.core.vision.VisionService
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -92,6 +95,8 @@ internal class SandboxTools(
     private val workspace: () -> String,
     private val visionEnabled: Boolean,
     private val search: SearchLimits = SearchLimits(),
+    /** 看图模型;主模型看不了图时,read_file 的图片由它转写。 */
+    private val vision: VisionService? = null,
     private val onCommand: (String) -> Unit = {},
     private val onProgress: (String) -> Unit = {},
     /** 运行环境还没准备好、工具在等它时(任务卡片显示「正在准备」)。 */
@@ -100,6 +105,8 @@ internal class SandboxTools(
     private val onScript: ((String) -> Unit)? = null,
     private val prepareWaitMs: Long = PREPARE_WAIT_MS,
 ) {
+    /** 看图模型读任意图片(非屏幕)的角色提示词。 */
+    private val READ_IMAGE_PROMPT: String by lazy { Prompts.role("read_image") }
     /** 设备支持就提供工具:运行环境首次启动时在后台准备,工具调用时等它。 */
     fun available(): Boolean = sandbox.status() !is SandboxStatus.Unsupported
 
@@ -261,7 +268,7 @@ internal class SandboxTools(
         else -> fail(e.code, "$path: ${e.message}", e.recoverable)
     }
 
-    internal fun readFile(a: Args, ws: String): ToolExecution {
+    internal suspend fun readFile(a: Args, ws: String): ToolExecution {
         val t = resolve(ws, a.str("path", max = 4096)!!, write = false) ?: return outside()
         val offset = a.int("offset", 0, Int.MAX_VALUE) ?: 0
         val limit = a.int("limit", 1, MAX_READ_BYTES) ?: DEFAULT_READ
@@ -269,13 +276,13 @@ internal class SandboxTools(
         return g.use { readOpened(t.path, g, offset, limit) }
     }
 
-    private fun readOpened(path: String, g: GatedFile, offset: Int, limit: Int): ToolExecution {
+    private suspend fun readOpened(path: String, g: GatedFile, offset: Int, limit: Int): ToolExecution {
         val size = g.size
         val ext = g.name.substringAfterLast('.', "").lowercase()
         IMAGE_TYPES[ext]?.let { type ->
-            if (!visionEnabled) return notText(path, size, type, "This is an image, and the current model cannot view images.")
             if (size > MAX_IMAGE) return fail("file_too_large", "$path is ${size / MB} MB; images over 5 MB are not returned. Make a smaller copy first.")
-            return ToolExecution(okObj { put("path", path); put("size", size); put("type", type) }, image = g.read(0, size.toInt()))
+            if (visionEnabled) return ToolExecution(okObj { put("path", path); put("size", size); put("type", type) }, image = g.read(0, size.toInt()))
+            return readImageByVision(path, g, type, size)
         }
         val bytes = if (offset >= size) ByteArray(0) else g.read(offset.toLong(), minOf(limit.toLong(), size - offset).toInt())
         // 从字的中间开始读:跳过开头的残字节
@@ -395,6 +402,21 @@ internal class SandboxTools(
         val (f, name) = withContext(Dispatchers.IO) { ShareRules.check(sandbox, ws, a.str("path", max = 4096)!!, a.str("name", min = 0, max = 200)) }
         val saved = sandbox.share(f, name)
         return ToolExecution(okObj { put("savedAs", saved) })
+    }
+
+    /** 主模型看不了图的图片:配了看图模型就由它转写(用户亲手放进工作区的文件,不涉受保护页面),没配就如实说并指路。 */
+    private suspend fun readImageByVision(path: String, g: GatedFile, type: String, size: Long): ToolExecution {
+        val vision = vision ?: return notText(path, size, type,
+            "This is an image, and the current model cannot view images and no vision model is configured. " +
+                "Tell the user that images (for example attachments) can be read once a vision model is set up in Mika's settings.")
+        val text = try {
+            vision.ask(READ_IMAGE_PROMPT, "The file $path ($type, $size bytes). Read everything visible in it.", listOf(g.read(0, size.toInt())))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return fail("vision_unavailable", "Reading $path with the vision model failed (${e.message ?: e::class.simpleName}). Tell the user, or continue without the image.")
+        }
+        return ToolExecution(okObj { put("path", path); put("size", size); put("type", type); put("content", text); put("source", "vision") })
     }
 
     private fun notText(path: String, size: Long, type: String, why: String) = ToolExecution(buildJsonObject {

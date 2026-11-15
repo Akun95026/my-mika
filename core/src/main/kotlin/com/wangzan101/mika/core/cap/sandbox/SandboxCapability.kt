@@ -11,6 +11,7 @@ import com.wangzan101.mika.core.knowledge.BundledScripts
 import com.wangzan101.mika.core.prompt.Prompts
 import com.wangzan101.mika.core.tool.AgentTool
 import com.wangzan101.mika.core.tool.ToolContext
+import com.wangzan101.mika.core.vision.VisionService
 import com.wangzan101.mika.core.workspace.SandboxPaths
 
 /**
@@ -22,6 +23,8 @@ internal class SandboxCapability(
     /** 本次任务的工作区(对话 ID)。 */
     workspace: () -> String,
     visionEnabled: Boolean,
+    /** 看图模型;主模型看不了图时,read_file 的图片由它转写。 */
+    vision: VisionService?,
     onCommand: (String) -> Unit,
     onProgress: (String) -> Unit,
     onPreparing: () -> Unit,
@@ -29,7 +32,7 @@ internal class SandboxCapability(
 ) : Capability {
     override val id = SANDBOX
 
-    val runner = port?.let { SandboxTools(it, workspace, visionEnabled, onCommand = onCommand, onProgress = onProgress, onPreparing = onPreparing, onScript = onScript) }
+    val runner = port?.let { SandboxTools(it, workspace, visionEnabled, vision = vision, onCommand = onCommand, onProgress = onProgress, onPreparing = onPreparing, onScript = onScript) }
 
     /** 设备支持沙箱(工具已提供,可能还在准备)。 */
     fun available(): Boolean = runner?.available() == true

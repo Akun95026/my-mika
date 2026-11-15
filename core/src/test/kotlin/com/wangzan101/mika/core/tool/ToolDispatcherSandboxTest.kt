@@ -24,9 +24,13 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.util.Base64
 import com.wangzan101.mika.core.cap.sandbox.SandboxTools
 import com.wangzan101.mika.core.cap.sandbox.SearchLimits
 import com.wangzan101.mika.core.assembly.toolDispatcher
+import com.wangzan101.mika.core.vision.JvmTestImageOps
+import com.wangzan101.mika.core.vision.VisionService
+import com.wangzan101.mika.core.vision.says
 
 private var seq = 0
 private fun call(name: String, args: JsonObject) = Part.ToolCall("c${++seq}", name, args.toString())
@@ -258,6 +262,42 @@ class ToolDispatcherSandboxTest {
         assertEquals("true", seen.content.s("ok"))
         assertArrayEquals(png, seen.image)
         assertEquals("file_not_found", read("none.txt").content.s("error"))
+    }
+
+    @Test fun imageReadFallsBackToVisionModelWhenMainModelCannotSee() = runTest {
+        val img = JvmTestImageOps.encode(4, 4) { x, y -> x * 40 + y }
+        File(ws, "inbox").mkdirs()
+        File(ws, "inbox/shot.png").writeBytes(img)
+        suspend fun read(d: ToolDispatcher, path: String = "inbox/shot.png") =
+            d.execute(call("read_file", buildJsonObject { put("path", path) }))
+        // 没配视觉模型:如实说并指路
+        val none = read(dispatcher()).content
+        assertEquals("not_text", none.s("error"))
+        assertTrue(none.s("message"), none.s("message").contains("no vision model is configured"))
+        // 配了视觉模型:图片由它转写返回,那张图原样到了视觉模型手里
+        val m = says("[文字] 会员码 88\n[画面] 一张截图")
+        val d = toolDispatcher(FakeScreen(), false, vision = VisionService(m, JvmTestImageOps), sandbox = sb, workspace = { "conv1" })
+        val r = read(d)
+        assertEquals("true", r.content.s("ok"))
+        assertEquals("vision", r.content.s("source"))
+        assertEquals("[文字] 会员码 88\n[画面] 一张截图", r.content.s("content"))
+        assertEquals("image/png", r.content.s("type"))
+        assertNull(r.image)
+        assertTrue(m.system!!, m.system!!.contains("[文字]"))
+        val sent = m.requests.single().single().parts.filterIsInstance<Part.Image>().single()
+        assertArrayEquals(img, Base64.getDecoder().decode(sent.pngBase64))
+        // 视觉模型出错:可恢复的失败,不静默
+        val broken = toolDispatcher(FakeScreen(), false, vision = VisionService(says(RuntimeException("boom")), JvmTestImageOps), sandbox = sb, workspace = { "conv1" })
+        val err = read(broken).content
+        assertEquals("vision_unavailable", err.s("error"))
+        assertEquals("true", err.s("recoverable"))
+        assertTrue(err.s("message"), err.s("message").contains("inbox/shot.png"))
+        // 超过 5MB:与主模型直返同一上限,不调视觉模型
+        File(ws, "big.png").writeBytes(ByteArray(5 * 1024 * 1024 + 1))
+        val bigM = says("x")
+        val big = toolDispatcher(FakeScreen(), false, vision = VisionService(bigM, JvmTestImageOps), sandbox = sb, workspace = { "conv1" })
+        assertEquals("file_too_large", read(big, "big.png").content.s("error"))
+        assertTrue(bigM.requests.isEmpty())
     }
 
     @Test fun readFileUsesByteOffsetAndLimit() = runTest {
